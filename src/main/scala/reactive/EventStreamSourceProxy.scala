@@ -4,7 +4,7 @@ package reactive
  * An EventStream that is implemented by delegating everything to an EventSource
  */
 trait EventStreamSourceProxy[T] extends EventStream[T] with Observing {
-  def source: EventSource[T]
+  lazy val source: EventSource[T] = new EventSource[T]
   def flatMap[U](f: T=>EventStream[U]): EventStream[U] = source.flatMap[U](f)
   def foreach(f: T=>Unit)(implicit observing: Observing): Unit = source.foreach(f)(observing)
   def |[U>:T](that: EventStream[U]): EventStream[U] = source.|(that)
