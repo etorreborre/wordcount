@@ -52,6 +52,9 @@ object DocReader {
     }
   }
   implicit def otherReader: DocReader[Other] = new DocReader[Other] {
-    def readFrom(doc: Other) = Left(new Exception("This format is not supported: "+doc.extension))
+    def readFrom(doc: Other) = {
+      if (doc.path.isEmpty)  Left(new Exception("No file"))
+      else                   Left(new Exception("This format is not supported: "+doc.extension))
+    }
   }
 }

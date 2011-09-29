@@ -1,8 +1,7 @@
 package gui
 
-import swing.{Publisher, Action, MenuItem}
+import swing.MenuItem
 
-case class ActionMenuItem(a: PublishableAction) extends MenuItem(a.title) with Publisher {
+case class ActionMenuItem(a: EventSourceAction) extends MenuItem(a.title) {
   action = a
-  a.publisher = this
 }

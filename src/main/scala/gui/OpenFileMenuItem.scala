@@ -5,12 +5,12 @@ import event.SelectionChanged
 import javax.swing.KeyStroke
 import java.awt.event.{ActionEvent, KeyEvent}
 import Images._
+import java.io.File
+import reactive._
 
-case class OpenFileMenuItem(start: String) extends MenuItem("Open") with Publisher { outer =>
+case class OpenFileMenuItem(start: String) extends MenuItem("Open") with EventStreamSourceProxy[File] { outer =>
   var file: Option[String] = None
   val fileChooser = new FileChooser(new java.io.File(start))
-
-  private def publishFileSelected = publish(SelectionChanged(this))
 
   action = new Action("Open") {
     icon = getIcon("folder-icon.png")
@@ -20,7 +20,9 @@ case class OpenFileMenuItem(start: String) extends MenuItem("Open") with Publish
     def apply() {
       fileChooser.showOpenDialog(outer)
       file = Some(fileChooser.selectedFile.getPath)
-      publishFileSelected
+      source.fire(fileChooser.selectedFile)
     }
   }
 }
+
+

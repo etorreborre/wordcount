@@ -5,23 +5,26 @@ import java.awt.Cursor._
 import javax.swing.SwingUtilities
 import Images._
 import java.awt.{Point, Toolkit, Cursor}
+import reactive._
 
-class BackgroundAction[T](action: =>T)(implicit parent: UIElement) {
-  def execute = {
+class BackgroundAction[T](action: =>T) {
+
+  def inBackground(progress: EventSource[ActionInProgress] = new EventSource[ActionInProgress]()): EventStream[T] = {
+    val result: EventSource[T] = new EventSource
     SwingUtilities.invokeLater(new Runnable {
       def run =  try {
-        parent.cursor = waitCursor
-        action
-       } finally { parent.cursor = new Cursor(DEFAULT_CURSOR) }
+        progress.fire(Started())
+        result.fire(action)
+       } finally { progress.fire(Finished()) }
     })
+    result
   }
-
-  lazy val waitCursor = Toolkit.getDefaultToolkit.createCustomCursor(getImage("clock-icon.png"), new Point(0,0), "cursor");
 }
 
 object BackgroundAction {
-  implicit def unitToBackgroundAction[T](action: =>T)(implicit parent: UIElement) = new InvokeLaterBackgroundAction(action)
-  class InvokeLaterBackgroundAction[T](action: =>T)(implicit parent: UIElement) {
-    def invokeLater = new BackgroundAction(action).execute
-  }
+  implicit def actionToBackgroundAction[T](action: =>T) = new BackgroundAction(action)
 }
+
+sealed trait ActionInProgress
+case class Started() extends ActionInProgress
+case class Finished() extends ActionInProgress

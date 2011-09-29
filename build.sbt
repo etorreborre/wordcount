@@ -11,10 +11,6 @@ scalacOptions := Seq("-deprecation")
 
 mainClass in (Compile, packageBin) := Some("essays.CountApp")
 
-seq(oneJarSettings: _*)
-
-artifact in oneJar <<= moduleName(Artifact(_, "app"))
-
 /** Dependencies */
 resolvers ++= Seq("snapshots-repo" at "http://scala-tools.org/repo-snapshots", 
                   "Local Maven Repository" at "file://$M2_REPO")
@@ -26,4 +22,5 @@ libraryDependencies ++= Seq(
   "org.specs2" %% "specs2-scalaz-core" % "6.0.1",
   "org.specs2" %% "specs2" % "1.7-SNAPSHOT",
   "org.hamcrest" % "hamcrest-all" % "1.1",
-  "org.mockito" % "mockito-all" % "1.8.5")
+  "org.mockito" % "mockito-all" % "1.8.5",
+  "cc.co.scala-reactive" %% "reactive-core" % "0.2-SNAPSHOT")

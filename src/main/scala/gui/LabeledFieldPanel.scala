@@ -2,14 +2,14 @@ package gui
 
 import swing._
 import Orientation._
+import reactive.{Observing, Signal, Var}
 
-class LabeledFieldPanel(label: String) extends BoxPanel(Horizontal) {
-  protected lazy val textField = new TextField("") { editable = false }
+class LabeledFieldPanel(label: String, text: Signal[String]) extends BoxPanel(Horizontal) with Observing {
+  protected lazy val textField = new TextField(text.now) { editable = false }
 
   contents += new Label(label+" ")
   contents += textField
   border = Swing.EtchedBorder(Swing.Lowered)
 
-  def text = textField.text
-  def text_=(t: String): Unit = textField.text = t
+  text.change.foreach { t => textField.text = t }
 }
