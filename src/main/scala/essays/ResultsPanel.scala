@@ -70,7 +70,7 @@ case class ReferencesTable(references: EventStream[Seq[Reference]]) extends Tabl
       def getColumnCount() = columnNames.size
       def getValueAt(row: Int, col: Int): AnyRef = {
         val r = refs(row)
-        Seq(r.ref, r.years, r.pages.getOrElse(""))(col).asInstanceOf[AnyRef]
+        Seq(if (r.ref.isEmpty) r.quotation else r.ref, r.years, r.pages.getOrElse(""))(col).asInstanceOf[AnyRef]
       }
       override def isCellEditable(row: Int, column: Int) = false
     }

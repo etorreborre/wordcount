@@ -47,11 +47,11 @@ trait TextParsing extends RegexParsers {
   }
 
   def reference: Parser[Results] = referenceN(5)
-  def quoteText = "\"|''|\u201C".r ~> "[^\"'\u201D]+".r <~ "\"|''|\u201D".r
-  def quote: Parser[Results] = quoteText ^^ { r => Results(Words.fromString(r)) }
+  def quotationText = ("\"|\u201C".r ~> "[^\"\u201D]+".r <~ "\"|\u201D".r) | "''.+?''".r ^^ (_.replace("''", ""))
+  def quotation: Parser[Results] = quotationText ^^ { r => Results(references=Seq(Reference(quotation = r))) }
 
   def references: Parser[Results] =
-    opt(quoteText <~ space) ~ ("(" ~> chainl1(reference, semicolumnSep) <~ ")") ^^ {  case q ~ r => r addQuote q }
+    opt(quotationText <~ space) ~ ("(" ~> chainl1(reference, semicolumnSep) <~ ")") ^^ {  case q ~ r => r addQuotation q }
   def noRefParenthesised: Parser[Results] = "(" ~> noRef <~ ")"
 
   /**
@@ -65,7 +65,7 @@ trait TextParsing extends RegexParsers {
   /**
    * The main parser
    */
-  def referencedText: Parser[Results] = rep((references | noRefParenthesised | quote | words | space) <~ opt(punctuation)) ^^ reduceResults
+  def referencedText: Parser[Results] = rep((references | noRefParenthesised | quotation | words | space) <~ opt(punctuation)) ^^ reduceResults
 
   def parse(source: Reader[Char]): Results = {
     parseAll(referencedText, source) match {

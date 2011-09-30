@@ -12,12 +12,12 @@ case class Results(words: Words = Words(), references: Seq[Reference] = Seq(), m
   def refsWordsNumber = references.foldLeft(0) { (res, cur) => res + cur.wordsNumber }
   def diffsNumber = fullTextWordsNumber - (wordsNumber + refsWordsNumber)
   
-  def addQuote(quote: Option[String]) = copy(references = references.dropRight(1) ++ references.lastOption.map(r => r.addQuote(quote)).toSeq)
+  def addQuotation(quotation: Option[String]) = copy(references = references.dropRight(1) ++ references.lastOption.map(r => r.addQuotation(quotation)).toSeq)
   override def toString = "Results("+words+","+references+(if (message.isEmpty) "" else ","+message)+")"
 }
 
 object Results {
-  def fromQuote(quote: Option[String]) = Results(references = Reference.fromQuote(quote).toSeq)
+  def fromQuotation(quotation: Option[String]) = Results(references = Reference.fromQuotation(quotation).toSeq)
 }
 
 case class Words(number: Int = 0) {
@@ -27,19 +27,19 @@ object Words {
   def fromString(s: String) = Words(s.split("\\s").size)
 }
 
-case class Reference(ref: String="", years: Years = Years(), pages: Option[Pages] = None, quote: String = "") {
-  override def toString = (Seq[Any](ref, years) ++ pages.toSeq).mkString(", ")
+case class Reference(ref: String="", years: Years = Years(), pages: Option[Pages] = None, quotation: String = "") {
+  override def toString = if (ref.isEmpty) quotation else (Seq[Any](ref, years) ++ pages.toSeq).mkString(", ")
 
-  def addQuote(quote: Option[String]) = quote.map(q => copy(quote = q)).getOrElse(this)
-  def wordsNumber = Seq(ref, years.toString, pages.toString, quote).foldLeft(0) { _ + _.wordsNumber }
+  def addQuotation(quotation: Option[String]) = quotation.map(q => copy(quotation = q)).getOrElse(this)
+  def wordsNumber = if (ref.isEmpty) quotation.wordsNumber else Seq(ref, years.toString, pages.toString, quotation).foldLeft(0) { _ + _.wordsNumber }
 }
 
 object Reference {
   def apply(ref: String, years: Years, pages: Pages): Reference = new Reference(ref, years, Some(pages))
-  def fromQuote(quote: Option[String]) = quote.map(q => Reference(quote = q))
+  def fromQuotation(quotation: Option[String]) = quotation.map(q => Reference(quotation = q))
 }
 case class Year(year: Int = 0, firstEdition: Boolean = false) {
-  override def toString = if (firstEdition) "["+year.toString+"]" else year.toString
+  override def toString = if (year == 0) "" else if (firstEdition) "["+year.toString+"]" else year.toString
 }
 case class Years(year1: Year = Year(), year2: Option[Year] = None, separator: String = "-") {
   override def toString = (Seq(year1) ++ year2.toSeq).mkString(separator)

@@ -59,7 +59,8 @@ class TextParsingSpec extends Specification with ParserMatchers with ResultMatch
   "no words must be counted in references"                                                                                       ! parsing.e3^
   "single punctuation characters can follow a ref"                                                                               ! parsing.e4^
   "words must be counted ok when references and text are interleaved"                                                            ! parsing.e5^
-  """a quote is some text between "", followed by a reference. It must not be counted"""                                         ! parsing.e6^
+  """a quotation is some text between "". It must not be counted"""                                                              ! parsing.e6^
+  "a quotation can be followed by a reference. It must not be counted"                                                           ! parsing.e7^
                                                                                                                                  p^
   "additional examples"                                                                                                          ^
   { parse("hello (reference, 1984) world").words must_== Words(2) }                                                              ^
@@ -78,6 +79,7 @@ class TextParsingSpec extends Specification with ParserMatchers with ResultMatch
     def e4 = parse("(reference, 1984, p.88)!").words must_== Words(0)
     def e5 = parse("hello (reference, 1984, p.88) world").words must_== Words(2)
     def e6 = parse("""Freud said: "Hello Martha" (My Life, 1923, p.38). Incredible!""").words must_== Words(3)
+    def e7 = parse("""Hey ''you dont'' he told me""").words must_== Words(4)
 
   }
 

@@ -11,6 +11,10 @@ scalacOptions := Seq("-deprecation")
 
 mainClass in (Compile, packageBin) := Some("essays.CountApp")
 
+seq(oneJarSettings: _*)
+
+artifact in oneJar <<= moduleName(Artifact(_, "app"))
+
 /** Dependencies */
 resolvers ++= Seq("snapshots-repo" at "http://scala-tools.org/repo-snapshots", 
                   "Local Maven Repository" at "file://$M2_REPO")
