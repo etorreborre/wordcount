@@ -1,10 +1,8 @@
 package essays
 
 import org.specs2._
-import matcher._
-import ParboiledTextParsing._
 
-class ParboiledTextParsingSpec extends Specification { def is  =
+class ParboiledTextParsingSpec extends Specification with ParboiledTextParsing { def is  =
 
 "Parsers"                                                                                                                        ^
                                                                                                                                  end
