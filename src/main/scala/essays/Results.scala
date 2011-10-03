@@ -27,11 +27,12 @@ object Words {
   def fromString(s: String) = Words(s.split("\\s").size)
 }
 
-case class Reference(ref: String="", years: Years = Years(), pages: Option[Pages] = None, quotation: String = "") {
+case class Reference(ref: String = "", years: Years = Years(), pages: Option[Pages] = None, quotation: String = "") {
   override def toString = if (ref.isEmpty) quotation else (Seq[Any](ref, years) ++ pages.toSeq).mkString(", ")
 
   def addQuotation(quotation: Option[String]) = quotation.map(q => copy(quotation = q)).getOrElse(this)
-  def wordsNumber = if (ref.isEmpty) quotation.wordsNumber else Seq(ref, years.toString, pages.toString, quotation).foldLeft(0) { _ + _.wordsNumber }
+  def wordsNumber =
+    if (ref.isEmpty) quotation.wordsNumber else (Seq(ref, years, quotation) ++ pages.toSeq).foldLeft(0) { _ + _.toString.wordsNumber }
 }
 
 object Reference {

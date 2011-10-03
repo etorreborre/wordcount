@@ -8,25 +8,24 @@ import combinator.RegexParsers
  * Parsers combinators for references in some text
  */
 trait TextParsing extends RegexParsers {
-  override def skipWhitespace = false
 
   /**
    * References parsing
    */
   def semicolumnSep: Parser[(Results, Results) => Results] = "\\;\\s*".r ^^^ { (_: Results).add(_) }
 
-  def firstEdition: Parser[Year] = "\\[".r ~> "\\d\\d\\d\\d".r <~ "\\]".r ^^ { y => Year(y.toInt, firstEdition = true) }
-  def laterEdition: Parser[Year] = "\\d\\d\\d\\d".r ^^ { y => Year(y.toInt) }
+  def firstEdition = "\\[".r ~> "\\d\\d\\d\\d".r <~ "\\]".r ^^ { y => Year(y.toInt, firstEdition = true) }
+  def laterEdition = "\\d\\d\\d\\d".r ^^ { y => Year(y.toInt) }
 
-  def year: Parser[Year]   = firstEdition | laterEdition
-  def years: Parser[Years] = year ~ "\\-|/|\\s*".r ~ year ^^ { case y1 ~ s ~ y2 => Years(y1, Some(y2), s) } |
-                             year ~ year                  ^^ { case y1 ~ y2 => Years(y1, Some(y2)) } |
-                             year                         ^^ { case y1          => Years(y1) }
+  def year  = firstEdition | laterEdition
+  def years = year ~ "\\-|/|\\s*".r ~ year ^^ { case y1 ~ s ~ y2 => Years(y1, Some(y2), s) } |
+              year ~ year                  ^^ { case y1 ~ y2     => Years(y1, Some(y2)) } |
+              year                         ^^ { case y1          => Years(y1) }
 
 
-  def page: Parser[Pages] = "p\\.*".r ~ "\\d*".r ^^ { case a ~ b => Pages(a+b) }
-  def pageRange: Parser[Pages] = "(pp|p)\\.*".r ~ "\\d*".r ~ "\\-|/".r ~ "\\d*".r ^^ { case a ~ b ~ c ~ d => Pages(a+b+c+d) }
-  def pages: Parser[Pages] = pageRange | page
+  def page      = "p\\.*".r ~ "\\d*".r ^^ { case a ~ b => Pages(a+b) }
+  def pageRange = "(pp|p)\\.*".r ~ "\\d*".r ~ "\\-|/".r ~ "\\d*".r ^^ { case a ~ b ~ c ~ d => Pages(a+b+c+d) }
+  def pages     = pageRange | page
 
   def commaNumberIs(i: Int) = guard(Seq.fill(i+1)(noComma).mkString("\\,").r)
   def noComma = "[^\\,\\(\\)\\;\\[\\]]+"
@@ -46,26 +45,25 @@ trait TextParsing extends RegexParsers {
     parser
   }
 
-  def reference: Parser[Results] = referenceN(5)
+  def reference     = referenceN(5)
   def quotationText = ("\"|\u201C".r ~> "[^\"\u201D]+".r <~ "\"|\u201D".r) | "''.+?''".r ^^ (_.replace("''", ""))
-  def quotation: Parser[Results] = quotationText ^^ { r => Results(references=Seq(Reference(quotation = r))) }
+  def quotation     = quotationText ^^ { r => Results(references=Seq(Reference(quotation = r))) }
 
-  def references: Parser[Results] =
-    opt(quotationText <~ space) ~ ("(" ~> chainl1(reference, semicolumnSep) <~ ")") ^^ {  case q ~ r => r addQuotation q }
-  def noRefParenthesised: Parser[Results] = "(" ~> noRef <~ ")"
+  def references = opt(quotationText) ~ ("(" ~> chainl1(reference, semicolumnSep) <~ ")") ^^ {  case q ~ r => r addQuotation q }
+  def noRefParenthesised = "(" ~> noRef <~ ")"
 
   /**
    * General text parsing
    */
-  def punctuation: Parser[Results] = "\\,|\\!|\\.|\\?|\\:|\\;".r ^^^ Results(Words(1))
+  def punctuation = "\\,|\\!|\\.|\\?|\\:|\\;".r ^^^ Results(Words(1))
   def commaSep: Parser[String] = "\\,\\s*".r
-  def space: Parser[Results] = "\\s+".r ^^^ Results()
-  def words: Parser[Results]  = "[^\\(\\)\"\\s]+".r ^^^ Results(Words(1))
+  def space = "\\s+".r ^^^ Results()
+  def words = "[^\\(\\)\"\\s]+".r ^^^ Results(Words(1))
 
   /**
    * The main parser
    */
-  def referencedText: Parser[Results] = rep((references | noRefParenthesised | quotation | words | space) <~ opt(punctuation)) ^^ reduceResults
+  def referencedText = rep((references | noRefParenthesised | quotation | words | space) <~ opt(punctuation)) ^^ reduceResults
 
   def parse(source: Reader[Char]): Results = {
     parseAll(referencedText, source) match {
