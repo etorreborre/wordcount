@@ -45,6 +45,7 @@ class TextParsingSpec extends Specification with ParserMatchers with ResultMatch
   { pages must succeedOn("p.215/324") }                                                                                          ^
   { pages must succeedOn("pp.215-324") }                                                                                         ^
   { pages must succeedOn("pp.215/324") }                                                                                         ^
+  { pages("pp. 215/324") must haveSuccessResult(===(Pages("pp. 215/324"))) }                                                     ^
                                                                                                                                  p^
   "Words"                                                                                                                        ^
   { words must succeedOn("hello") }                                                                                              ^
