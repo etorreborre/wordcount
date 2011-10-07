@@ -6,7 +6,7 @@ import gui.{LabeledFieldPanel, PositionedBorderPanel}
 import swing._
 import event.SelectionEvent
 import Orientation._
-import reactive.{Var, Signal, Observing, EventStream}
+import reactive._
 
 class ResultsPanel(totalWordsNumber: TotalWordsNumbers, referencesTable: ReferencesTable, errors: ErrorMessageBox) extends
   PositionedBorderPanel(north = totalWordsNumber, center = new ScrollPane(referencesTable), south = errors) with Observing
@@ -15,11 +15,11 @@ object ResultsPanel {
   def apply(results: EventStream[Results]) = {
     new ResultsPanel(TotalWordsNumbers(results),
                      ReferencesTable(results.map(_.references)),
-                     ErrorMessageBox(results.map(_.message).hold("")))
+                     ErrorMessageBox(results.map(_.message)))
   }
 }
 
-case class ErrorMessageBox(message: Signal[String] = Var("")) extends TextField with Observing {
+case class ErrorMessageBox(message: EventStream[String] = new EventSource[String]) extends TextField with Observing {
   foreground = Color.red
   font = new Font("Courier", Font.PLAIN, 15);
   editable = false
@@ -33,26 +33,25 @@ class TotalWordsNumbers(wordsNumber: WordsNumber,
 
 object TotalWordsNumbers {
   def apply(results: EventStream[Results]) = {
-    val r = results.hold(Results())
     new TotalWordsNumbers(
-      WordsNumber(r.map(_.wordsNumber)),
-      FullTextNumber(r.map(_.fullTextWordsNumber)),
-      RefsNumber(r.map(_.refsWordsNumber)),
-      DiffsNumber(r.map(_.diffsNumber))
+      WordsNumber(results.map(_.wordsNumber)),
+      FullTextNumber(results.map(_.fullTextWordsNumber)),
+      RefsNumber(results.map(_.refsWordsNumber)),
+      DiffsNumber(results.map(_.diffsNumber))
     )
   }
 }
 
-case class FullTextNumber(wordsNumber: Signal[Int] = Var(0)) extends LabeledFieldPanel("Full text", wordsNumber.map(_.toString))
-case class RefsNumber(refsNumber: Signal[Int] = Var(0)) extends LabeledFieldPanel("References", refsNumber.map(_.toString))
-case class DiffsNumber(diffsNumber: Signal[Int] = Var(0)) extends LabeledFieldPanel("Difference", diffsNumber.map(_.toString)) with Observing {
+case class FullTextNumber(wordsNumber: EventStream[Int]) extends LabeledFieldPanel("Full text", wordsNumber.map(_.toString))
+case class RefsNumber(refsNumber: EventStream[Int]) extends LabeledFieldPanel("References", refsNumber.map(_.toString))
+case class DiffsNumber(diffsNumber: EventStream[Int]) extends LabeledFieldPanel("Difference", diffsNumber.map(_.toString)) with Observing {
   diffsNumber.foreach { d =>
     if (d != 0) textField.foreground = Color.red
     else        textField.foreground = Color.black
   }
 }
 
-case class WordsNumber(wordsNumber: Signal[Int] = Var(0)) extends TextField with Observing {
+case class WordsNumber(wordsNumber: EventStream[Int]) extends TextField with Observing {
   foreground = Color.blue
   font = new Font("Verdana", Font.PLAIN, 30);
   editable = false

@@ -28,7 +28,7 @@ object CountApp extends SimpleSwingApplication with Observing {
   lazy val openFileMenuItem: OpenFileMenuItem   = OpenFileMenuItem("./src/test/resources")
   lazy val countAction                          = CountAction()
   lazy val countMenuItem                        = ActionMenuItem(countAction)
-  lazy val selectedFilePanel: LabeledFieldPanel = new LabeledFieldPanel("Selected file", filePath)
+  lazy val selectedFilePanel: LabeledFieldPanel = new LabeledFieldPanel("Selected file", filePath.change)
   lazy val resultsPanel                         = ResultsPanel(results)
   val actionWaitCursor: ActionWaitCursor        = ActionWaitCursor(top, actionProgress)
 
