@@ -23,6 +23,6 @@ libraryDependencies ++= Seq(
   "org.specs2" %% "specs2" % "1.7-SNAPSHOT",
   "org.hamcrest" % "hamcrest-all" % "1.1",
   "org.mockito" % "mockito-all" % "1.8.5",
-  "org.parboiled" % "parboiled-core" % "1.0.1",
-  "org.parboiled" % "parboiled-scala" % "1.0.1",
+  "org.parboiled" % "parboiled-core" % "1.0.1" withSources,
+  "org.parboiled" % "parboiled-scala" % "1.0.1" withSources,
   "cc.co.scala-reactive" %% "reactive-core" % "0.2-SNAPSHOT")
