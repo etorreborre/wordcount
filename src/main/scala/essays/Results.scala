@@ -41,8 +41,8 @@ object Reference {
 case class Year(year: Int = 0, firstEdition: Boolean = false) {
   override def toString = if (firstEdition) "["+year.toString+"]" else year.toString
 }
-case class Years(year1: Year = Year(), year2: Option[Year] = None, separator: String = "-") {
-  override def toString = (Seq(year1) ++ year2.toSeq).mkString(separator)
+case class Years(year1: Year = Year(), separator: Option[String] = None, year2: Option[Year] = None) {
+  override def toString = (Seq(year1) ++ year2.toSeq).mkString(separator.getOrElse("-"))
 }
 case class Pages(pages: String = "") {
   override def toString = pages

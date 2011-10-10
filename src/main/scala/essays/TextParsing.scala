@@ -19,8 +19,8 @@ trait TextParsing extends RegexParsers {
   def laterEdition: Parser[Year] = "\\d\\d\\d\\d".r ^^ { y => Year(y.toInt) }
 
   def year: Parser[Year]   = firstEdition | laterEdition
-  def years: Parser[Years] = year ~ "\\-|/|\\s*".r ~ year ^^ { case y1 ~ s ~ y2 => Years(y1, Some(y2), s) } |
-                             year ~ year                  ^^ { case y1 ~ y2 => Years(y1, Some(y2)) } |
+  def years: Parser[Years] = year ~ "\\-|/|\\s*".r ~ year ^^ { case y1 ~ s ~ y2 => Years(y1, Some(s), Some(y2)) } |
+                             year ~ year                  ^^ { case y1 ~ y2     => Years(y1, None, Some(y2)) } |
                              year                         ^^ { case y1          => Years(y1) }
 
 
