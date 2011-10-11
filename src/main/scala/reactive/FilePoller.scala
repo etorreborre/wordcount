@@ -7,7 +7,7 @@ class FilePoller(path: Signal[String], delay: Long = 200) extends Trigger {
   private var lastModified = new File(path.now).lastModified()
 
   val timer = new Timer(0, delay, {t =>  false}) foreach { tick =>
-    if (new File(path.now).lastModified() > lastModified) {
+    if (new File(path.now).lastModified() > lastModified || newLastModified == 0) {
       lastModified = new File(path.now).lastModified()
       source.fire(true)
     }
