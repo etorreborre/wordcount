@@ -60,10 +60,10 @@ case class WordsNumber(wordsNumber: Signal[Int] = Var(0)) extends TextField with
   wordsNumber.foreach { n => text = " "+n+" word"+(if (n == 1) "" else "s") }
 }
 
-case class ReferencesTable(references: EventStream[Seq[Reference]]) extends Table() with Observing {
+case class ReferencesTable(references: EventStream[Seq[FullReference]]) extends Table() with Observing {
   val columnNames = Seq("Reference", "Year", "Page")
 
-  references.foreach { refs =>
+  references.map(rf => rf.flatMap(_.references)).foreach { refs =>
     model = new AbstractTableModel {
       override def getColumnName(column: Int) = columnNames(column)
       def getRowCount() = refs.size

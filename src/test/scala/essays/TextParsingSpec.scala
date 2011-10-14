@@ -74,7 +74,7 @@ class TextParsingSpec extends Specification with ParserMatchers with ResultMatch
     def e1 = parse("hello world") must_== Results(Words(2))
     def e2 = parse("(hello world)") must_== Results(Words(2))
     def e3 = parse("(reference, 1984, p.88)") must_==
-             Results(words = Words(), references = Seq(Reference("reference", Years(Year(1984)), Some(Pages("p.88")))))
+             Results.fromFullReference(FullReference(references = Seq(Reference("reference", Years(Year(1984)), Some(Pages("p.88"))))))
     def e4 = parse("(reference, 1984, p.88)!").words must_== Words(0)
     def e5 = parse("hello (reference, 1984, p.88) world").words must_== Words(2)
     def e6 = parse("""Freud said: "Hello Martha" (My Life, 1923, p.38). Incredible!""").words must_== Words(3)

@@ -3,31 +3,45 @@ package essays
 import org.specs2._
 import org.parboiled.scala._
 import parserunners.ReportingParseRunner
-import ParboiledTextParsing.useRule1
+import syntax.useRule1
 
 class ParboiledTextParsingSpec extends Specification with ParboiledTextParsing { def is  =
 
-"Parsers"                                                                                                                         ^
-  { pages.parse("p.3") === Pages("p.3") }                                                                                         ^
-  { pages.parse("p.34") === Pages("p.34") }                                                                                       ^
-  { pages.parse("p34") === Pages("p34") }                                                                                         ^
-  { pages.parse("p 34") === Pages("p 34") }                                                                                       ^
-  { pages.parse("p.215/324") === Pages("p.215/324") }                                                                             ^
-  { pages.parse("pp.215-324") === Pages("pp.215-324") }                                                                           ^
-  { pages.parse("pp.215/324") === Pages("pp.215/324") }                                                                           ^
-                                                                                                                                  p^
-"Years"                                                                                                                           ^
-  { years.parse("1905") === Years(Year(1905)) }                                                                                   ^
-  { years.parse("1905-1910") === Years(Year(1905), Some("-"), Some(Year(1910))) }                                                       ^
-  { years.parse("1905/1910") === Years(Year(1905), Some("/"), Some(Year(1910))) }                                                       ^
-  { years.parse("[1905]-1910") === Years(Year(1905, firstEdition=true), Some("-"), Some(Year(1910))) }                                  ^
-  { years.parse("1905 1910") === Years(Year(1905), Some(" "), Some(Year(1910))) }                                                       ^
-                                                                                                                                  end
+"Parsers"                                                                                                                                   ^
+  { pages.parse("p.3") === Pages("p.3") }                                                                                                   ^
+  { pages.parse("p.34") === Pages("p.34") }                                                                                                 ^
+  { pages.parse("p34") === Pages("p34") }                                                                                                   ^
+  { pages.parse("p 34") === Pages("p 34") }                                                                                                 ^
+  { pages.parse("p.215/324") === Pages("p.215/324") }                                                                                       ^
+  { pages.parse("pp.215-324") === Pages("pp.215-324") }                                                                                     ^
+  { pages.parse("pp.215/324") === Pages("pp.215/324") }                                                                                     ^
+                                                                                                                                            p^
+"Years"                                                                                                                                     ^
+  { years.parse("1905") === Years(Year(1905)) }                                                                                             ^
+  { years.parse("1905-1910") === Years(Year(1905), Some("-"), Some(Year(1910))) }                                                           ^
+  { years.parse("1905/1910") === Years(Year(1905), Some("/"), Some(Year(1910))) }                                                           ^
+  { years.parse("[1905]-1910") === Years(Year(1905, firstEdition=true), Some("-"), Some(Year(1910))) }                                      ^
+  { years.parse("1905 1910") === Years(Year(1905), Some(" ")  , Some(Year(1910))) }                                                         ^
+                                                                                                                                            p^
+"Reference"                                                                                                                                 ^
+  { reference.parse("(Freud, 1905, p.134)") === List(Reference("Freud", Years(Year(1905)), Some(Pages("p.134")))) }                         ^
+  { reference.parse("(Freud, Lacan, 1905, p.134)") === List(Reference("Freud, Lacan", Years(Year(1905)), Some(Pages("p.134")))) }           ^
+  { reference.parse("(Freud, 1905, p.134; Lacan, 1969, p.97)") ===
+    List(Reference("Freud", Years(Year(1905)), Some(Pages("p.134"))),
+         Reference("Lacan", Years(Year(1969)), Some(Pages("p.97")))) }                                                                      ^
+                                                                                                                                            p^
+"Quotation"                                                                                                                                 ^
+  { quotation.parse("''this is a quotation''") === Quotation("this is a quotation") }                                                       ^
+                                                                                                                                            p^
+"FullReference"                                                                                                                             ^
+  { fullRef.parse("''this is a quotation'' (Freud, 1905, p.134)") ===
+    FullReference(Some(Quotation("this is a quotation")), List(Reference("Freud", Years(Year(1905)), Some(Pages("p.134"))))) }              ^
+                                                                                                                                            end
 
 
 }
 
-object ParboiledTextParsing extends ParboiledTextParsing { outer =>
+object syntax { outer =>
   implicit def useRule1[T](rule: Rule1[T]): ReportingParserRunnerRule1[T] = new ReportingParserRunnerRule1[T](rule)
 
   class ReportingParserRunnerRule1[T](rule: Rule1[T]) {
@@ -36,31 +50,3 @@ object ParboiledTextParsing extends ParboiledTextParsing { outer =>
   def parse[T](rule: Rule1[T], input: String) = ReportingParseRunner(rule).run(input).result.getOrElse(Pages("wrong input"))
 }
 
-trait ParboiledTextParsing extends org.parboiled.scala.Parser {
-
-  // simple parsers
-  def space  = rule { zeroOrMore(anyOf(" \n\r\t\f")) }
-  def digit  = rule { "0" - "9" }
-  def digits = rule { oneOrMore(digit) }
-
-  // pages
-  def pagePrefix = rule { ("pp" | "p") ~ optional(".") ~ space }
-  def page       = rule { group(pagePrefix ~ digits) ~> Pages }
-  def pageSep    = rule { optional(anyOf("/-")) }
-  def pageRange  = rule { group(pagePrefix ~ digits ~ pageSep ~ space ~ digits) ~> Pages }
-  def pages      = pageRange | page
-
-  // years
-  def firstEdition = rule { "[" ~ nTimes(4, digit) ~> ((s: String) => Year(s.toInt, firstEdition = true)) ~ "]" }
-  def laterEdition = rule { nTimes(4, digit) ~> ((s: String) => Year(s.toInt)) }
-
-  def year    = rule { firstEdition | laterEdition }
-  def yearSep = rule { group(anyOf("/- ") ~ space) ~> ((s: String) => s ) }
-  def years   = rule { year ~ optional(yearSep) ~ optional(year) ~~> Years }
-
-  def letter = rule { "a" - "z" }
-  def word  = rule { zeroOrMore(letter) ~> ((s: String) => Results(Words.fromString(s)))}
-  def words = rule { zeroOrMore(word) }
-  def referencedText = rule { words }
-
-}

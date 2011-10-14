@@ -35,10 +35,10 @@ trait TextParsing extends RegexParsers {
   def notaReference = failure("not a reference") ^^^ Results()
 
   def makeRefYearsPages: PartialFunction[List[String] ~ Years ~ Pages, Results] =
-    { case r ~ y ~ p => Results(references=Seq(Reference(r.mkString(", "), y, p))) }
+    { case r ~ y ~ p => Results.fromFullReference(FullReference(references=Seq(Reference(r.mkString(", "), y, Some(p))))) }
 
   def makeRefYears: PartialFunction[List[String] ~ Years, Results] =
-    { case r ~ y     => Results(references=Seq(Reference(r.mkString(", "), y))) }
+    { case r ~ y     => Results.fromFullReference(FullReference(references=Seq(Reference(r.mkString(", "), y)))) }
 
   def referenceN(n: Int) = (1 to 5).foldLeft(notaReference) { (parser, i) =>
     repN(i, noComma.r <~ commaSep) ~ (years <~ commaSep) ~ pages ^^ makeRefYearsPages |
