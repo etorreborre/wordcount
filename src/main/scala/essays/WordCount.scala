@@ -8,7 +8,7 @@ import Doc._
 import DocReader._
 import docs.Doc._
 
-trait WordCounter extends TextParsing {
+trait WordCounter extends ParboiledTextParsing {
 
   def count(path: String): Results = countDoc(path)
 

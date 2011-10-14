@@ -43,4 +43,6 @@ trait ParboiledTextParsing extends Parser {
   def normalText   = rule { !fullRef ~ ANY ~> ((s: String) => Results(Words.fromString(s))) }
   def text         = rule { oneOrMore(normalText | fullRefText) ~~> ((results: List[Results]) => results.foldLeft(Results()) { _ add _ }) }
 
+  def parse(input: String) = ReportingParseRunner(text).run(input).result.getOrElse(Results(message="incorrect input"))
+
 }
