@@ -21,11 +21,11 @@ object Results {
   def fromFullReference(ref: FullReference) = Results(references = Seq(ref))
 }
 
-case class Words(number: Int = 0) {
-  def add(other: Words) = Words(number + other.number)
+case class Words(number: Int = 0, w: String = "") {
+  def add(other: Words) = Words(number + other.number, w+" "+other.w)
 }
 object Words {
-  def fromString(s: String) = Words(s.split("\\s").size)
+  def fromString(s: String) = Words(s.split("\\s").filter(_.nonEmpty).size, s)
 }
 
 case class Quotation(quotation: String = "") {
@@ -33,10 +33,11 @@ case class Quotation(quotation: String = "") {
 }
 
 case class Reference(ref: String="", years: Years = Years(), pages: Option[Pages] = None) {
-  override def toString = (Seq[Any](ref, years) ++ pages.toSeq).mkString(", ")
+  override def toString = (Seq[Any](ref, years) ++ pages.toSeq).mkString("Reference(", ", ", ")")
   def wordsNumber = Seq(ref, years.toString, pages.toString).foldLeft(0) { _ + _.wordsNumber }
 }
 case class FullReference(quotation: Option[Quotation] = None, references: Seq[Reference] = Seq()) {
+  override def toString = "FullReference("+quotation.map(_+",").getOrElse(", ")+references.mkString(", ")+")"
   def wordsNumber = 0
 }
 

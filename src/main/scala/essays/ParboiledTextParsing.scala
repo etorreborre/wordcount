@@ -10,8 +10,8 @@ trait ParboiledTextParsing extends Parser {
   def digits       = rule { oneOrMore(digit) }
   def letter       = rule { "a" - "z" | "A" - "Z" }
   def punctuation  = rule { anyOf("!?&.,;:-") }
-  def word         = rule { oneOrMore(letter | digit) }
-  def words        = rule { oneOrMore(word ~ (space | punctuation)) }
+  def word         = rule { oneOrMore("[" | "]" | letter | digit) ~ optional(punctuation) }
+  def words        = rule { oneOrMore(optional(space) ~ word ~ optional(space)) }
   def commaSep     = rule { "," ~ space }
 
   // pages
@@ -40,9 +40,10 @@ trait ParboiledTextParsing extends Parser {
   def fullRef      = rule { optional(quotation) ~ space ~ reference ~~> FullReference }
   def fullRefText  = rule { fullRef ~~> ((r: FullReference) => Results.fromFullReference(r)) }
 
-  def normalText   = rule { !fullRef ~ ANY ~> ((s: String) => Results(Words.fromString(s))) }
-  def text         = rule { oneOrMore(normalText | fullRefText) ~~> ((results: List[Results]) => results.foldLeft(Results()) { _ add _ }) }
+  def normalText   = rule { !fullRefText ~ words ~> ((s: String) => Results(Words.fromString(s))) }
+  def text         = rule { oneOrMore(fullRefText | normalText) ~~> ((results: List[Results]) => results.foldLeft(Results()) { _ add _ }) }
 
   def parse(input: String) = ReportingParseRunner(text).run(input).result.getOrElse(Results(message="incorrect input"))
+  override val buildParseTree = true
 
 }

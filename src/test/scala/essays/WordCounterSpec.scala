@@ -13,7 +13,7 @@ WordCounter counts words from a text document, but only counting normal text, no
                                                                                                                         p^
   "Count words from a sample file"                                                                                      ! sample^
   "Read files" ~/ new DocReaderSpec                                                                                     ^
-  "Parse text" ~/ new TextParsingSpec                                                                                   ^
+  "Parse text" ~/ new ParboiledTextParsingSpec                                                                          ^
                                                                                                                         end
 
   def sample = {
